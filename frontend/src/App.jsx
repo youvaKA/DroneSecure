@@ -5,16 +5,8 @@ import MissionList from './components/MissionList'
 import SwapResources from './components/SwapResources'
 import CONTRACT_ABI from './utils/DroneSecure.abi.json'
 
-// Try to load contract address from deployment config, fallback to default
-let CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3' // Default for local Hardhat
-
-try {
-  const config = await import('./utils/contract-config.json')
-  CONTRACT_ADDRESS = config.default?.address || CONTRACT_ADDRESS
-  console.log('Loaded contract address from config:', CONTRACT_ADDRESS)
-} catch (err) {
-  console.log('Using default contract address. Run deployment script to auto-configure.')
-}
+// Default contract address for local Hardhat network
+const DEFAULT_CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
 
 const ResourceLevel = {
   None: 0,
@@ -27,6 +19,7 @@ function App() {
   const [account, setAccount] = useState(null)
   const [contract, setContract] = useState(null)
   const [provider, setProvider] = useState(null)
+  const [contractAddress, setContractAddress] = useState(DEFAULT_CONTRACT_ADDRESS)
   const [missions, setMissions] = useState([])
   const [userStats, setUserStats] = useState({
     missionCount: 0,
@@ -35,6 +28,22 @@ function App() {
   })
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+
+  // Load contract address from config on mount
+  useEffect(() => {
+    const loadContractAddress = async () => {
+      try {
+        const config = await import('./utils/contract-config.json')
+        if (config.default?.address) {
+          setContractAddress(config.default.address)
+          console.log('Loaded contract address from config:', config.default.address)
+        }
+      } catch (err) {
+        console.log('Using default contract address. Run deployment script to auto-configure.')
+      }
+    }
+    loadContractAddress()
+  }, [])
 
   // Connect to MetaMask
   const connectWallet = async () => {
@@ -51,7 +60,7 @@ function App() {
       
       const _provider = new ethers.BrowserProvider(window.ethereum)
       const signer = await _provider.getSigner()
-      const _contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
+      const _contract = new ethers.Contract(contractAddress, CONTRACT_ABI, signer)
 
       setAccount(accounts[0])
       setProvider(_provider)
@@ -86,19 +95,37 @@ function App() {
   const loadMissions = async (_contract, userAddress) => {
     try {
       setLoading(true)
-      const missionCount = await _contract.getUserMissionCount(userAddress)
       const _missions = []
 
-      // Get all missions owned by user
-      // Since we don't have a direct getter, we'll try token IDs sequentially
-      // This is a simplified approach - in production, you'd use events or indexing
-      const maxTokens = 100 // Reasonable limit for demo
-      for (let i = 0; i < maxTokens; i++) {
-        try {
-          const owner = await _contract.ownerOf(i)
-          if (owner.toLowerCase() === userAddress.toLowerCase()) {
-            const mission = await _contract.getMission(i)
-            _missions.push({
+      // Get MissionCreated events for this user
+      // This is more efficient than iterating through all token IDs
+      try {
+        const filter = _contract.filters.MissionCreated(null, userAddress)
+        const events = await _contract.queryFilter(filter)
+        
+        // Check ownership of each token from events
+        const ownershipChecks = await Promise.all(
+          events.map(async (event) => {
+            const tokenId = event.args.tokenId
+            try {
+              const owner = await _contract.ownerOf(tokenId)
+              return { tokenId: Number(tokenId), isOwner: owner.toLowerCase() === userAddress.toLowerCase() }
+            } catch (err) {
+              // Token may have been burned
+              return { tokenId: Number(tokenId), isOwner: false }
+            }
+          })
+        )
+
+        // Load full mission data for owned tokens
+        const ownedTokenIds = ownershipChecks.filter(check => check.isOwner).map(check => check.tokenId)
+        
+        const missionDataPromises = ownedTokenIds.map(async (tokenId) => {
+          try {
+            const mission = await _contract.getMission(tokenId)
+            const isTransferable = await _contract.isTransferable(tokenId)
+            
+            return {
               tokenId: Number(mission.tokenId),
               level: Number(mission.level),
               ipfsCID: mission.ipfsCID,
@@ -107,13 +134,43 @@ function App() {
               lockedUntil: new Date(Number(mission.lockedUntil) * 1000),
               creator: mission.creator,
               previousOwners: mission.previousOwners,
-              isTransferable: await _contract.isTransferable(i)
-            })
+              isTransferable
+            }
+          } catch (err) {
+            console.error(`Error loading mission ${tokenId}:`, err)
+            return null
           }
-        } catch (err) {
-          // Token doesn't exist, continue
-          if (err.message.includes('ERC721NonexistentToken')) {
-            continue
+        })
+
+        const missionsData = await Promise.all(missionDataPromises)
+        _missions.push(...missionsData.filter(m => m !== null))
+      } catch (eventErr) {
+        console.warn('Event filtering not available, falling back to sequential scan:', eventErr)
+        
+        // Fallback: Sequential iteration (less efficient but works everywhere)
+        const maxTokens = 100
+        for (let i = 0; i < maxTokens; i++) {
+          try {
+            const owner = await _contract.ownerOf(i)
+            if (owner.toLowerCase() === userAddress.toLowerCase()) {
+              const mission = await _contract.getMission(i)
+              _missions.push({
+                tokenId: Number(mission.tokenId),
+                level: Number(mission.level),
+                ipfsCID: mission.ipfsCID,
+                createdAt: new Date(Number(mission.createdAt) * 1000),
+                lastTransferAt: new Date(Number(mission.lastTransferAt) * 1000),
+                lockedUntil: new Date(Number(mission.lockedUntil) * 1000),
+                creator: mission.creator,
+                previousOwners: mission.previousOwners,
+                isTransferable: await _contract.isTransferable(i)
+              })
+            }
+          } catch (err) {
+            // Token doesn't exist, continue
+            if (err.message.includes('ERC721NonexistentToken')) {
+              continue
+            }
           }
         }
       }
