@@ -13,6 +13,11 @@ artifacts
 *.abi
 *.bin
 
+# Frontend
+frontend/node_modules
+frontend/dist
+frontend/.vite
+
 # macOS
 .DS_Store
 
