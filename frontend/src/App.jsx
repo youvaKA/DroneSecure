@@ -5,9 +5,16 @@ import MissionList from './components/MissionList'
 import SwapResources from './components/SwapResources'
 import CONTRACT_ABI from './utils/DroneSecure.abi.json'
 
-// Default contract address for local Hardhat network
-// Update this after deploying to your network
-const CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+// Try to load contract address from deployment config, fallback to default
+let CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3' // Default for local Hardhat
+
+try {
+  const config = await import('./utils/contract-config.json')
+  CONTRACT_ADDRESS = config.default?.address || CONTRACT_ADDRESS
+  console.log('Loaded contract address from config:', CONTRACT_ADDRESS)
+} catch (err) {
+  console.log('Using default contract address. Run deployment script to auto-configure.')
+}
 
 const ResourceLevel = {
   None: 0,

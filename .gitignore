@@ -17,6 +17,7 @@ artifacts
 frontend/node_modules
 frontend/dist
 frontend/.vite
+!frontend/src/utils/contract-config.json
 
 # macOS
 .DS_Store
