@@ -1,0 +1,30 @@
+{
+    "name": "Mission_Alpha_2026",
+    "type": "Urgence Médicale",
+    "value": "Niveau 3",
+    "hash": "QmP7hdxcUCjC5aM6ZgcRvSgMPP9HjL1F9Zr2xVZ1MqQ8Lh",
+    "previousOwners": [
+        "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+        "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4"
+    ],
+    "createdAt": "1737052800",
+    "lastTransferAt": "1737053500",
+    "attributes": {
+        "weight": "2kg",
+        "range": "15km",
+        "priority": "high",
+        "departureCity": "Paris",
+        "destinationCity": "Lyon",
+        "estimatedDuration": "45min",
+        "cargo": "Medical supplies"
+    },
+    "flightPlan": {
+        "waypoints": [
+            {"lat": 48.8566, "lon": 2.3522},
+            {"lat": 47.2173, "lon": -1.5534},
+            {"lat": 45.7640, "lon": 4.8357}
+        ],
+        "altitude": "120m",
+        "speed": "25m/s"
+    }
+}

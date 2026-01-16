@@ -1,0 +1,21 @@
+{
+  "name": "dronesecure",
+  "version": "1.0.0",
+  "description": "DroneSecure : Gestion de l'Espace Aérien Cette DApp gère les autorisations de vol pour flottes de drones. Blockchain : Elle agit comme une \"boîte noire\" immuable.",
+  "main": "index.js",
+  "scripts": {
+    "test": "hardhat test",
+    "compile": "hardhat compile",
+    "deploy:local": "hardhat run scripts/deploy.js",
+    "node": "hardhat node"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+    "@openzeppelin/contracts": "^5.4.0",
+    "hardhat": "^2.28.3",
+    "solc": "^0.8.20"
+  }
+}
