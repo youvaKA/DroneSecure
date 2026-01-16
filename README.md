@@ -144,7 +144,13 @@ function getUserMissionCount(address user) public view returns (uint256)
 function canCreateMission(address user) public view returns (bool)
 function cooldownRemaining(address user) public view returns (uint256)
 function isTransferable(uint256 tokenId) public view returns (bool)
+function getPreviousOwners(uint256 tokenId) public view returns (address[] memory)
+function getLastTransferAt(uint256 tokenId) public view returns (uint256)
 ```
+
+**Nouvelles fonctions de traçabilité :**
+- `getPreviousOwners` : Retourne la liste complète des anciens propriétaires d'une mission
+- `getLastTransferAt` : Retourne le timestamp du dernier transfert de la mission
 
 ---
 
@@ -158,6 +164,8 @@ Le projet inclut une suite de tests complète couvrant :
 - ✅ Lock de 10 minutes pour les transferts
 - ✅ Échange de ressources (3 Standard → 1 Medical Urgency)
 - ✅ Intégration IPFS pour les métadonnées
+- ✅ Suivi des anciens propriétaires (previousOwners)
+- ✅ Suivi des timestamps de transfert (lastTransferAt)
 - ✅ Gestion des cas limites et erreurs
 
 Exécutez les tests avec :
