@@ -227,7 +227,7 @@ describe("DroneSecure", function () {
     it("Should emit SlotsExchanged event", async function () {
       await expect(droneSecure.connect(operator1).exchangeN1ForN2(1))
         .to.emit(droneSecure, "SlotsExchanged")
-        .withArgs(operator1.address, 2, 1);
+        .withArgs(operator1.address, 0, 2, 1, 1); // fromLevel=N1(0), fromAmount=2, toLevel=N2(1), toAmount=1
     });
   });
 

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 // Example usage of DroneSecure contract
 
 const hre = require("hardhat");

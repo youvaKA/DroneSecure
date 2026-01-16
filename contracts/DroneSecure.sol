@@ -15,7 +15,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
  * 
  * Constraints:
  * - Maximum 4 simultaneous missions per operator
- * - Token exchange: 2 N1 slots ↔ 1 N2 slot (zone-dependent)
+ * - Token exchange: 2 N1 slots ↔ 1 N2 slot
  */
 contract DroneSecure is Ownable, ReentrancyGuard {
     
@@ -54,7 +54,7 @@ contract DroneSecure is Ownable, ReentrancyGuard {
         DroneLevel level;
         string zone;
         uint256 timestamp;
-        string eventType; // "START", "END", "COLLISION", "PRIORITY_CHANGE"
+        string eventType; // "START", "END", "COLLISION", "CANCELLED"
         string details;
     }
     
@@ -83,7 +83,7 @@ contract DroneSecure is Ownable, ReentrancyGuard {
     event MissionStarted(uint256 indexed missionId, address indexed operator, DroneLevel level, string zone, uint256 priority);
     event MissionCompleted(uint256 indexed missionId, address indexed operator);
     event MissionCancelled(uint256 indexed missionId, address indexed operator);
-    event SlotsExchanged(address indexed operator, uint256 n1SlotsUsed, uint256 n2SlotsReceived);
+    event SlotsExchanged(address indexed operator, DroneLevel fromLevel, uint256 fromAmount, DroneLevel toLevel, uint256 toAmount);
     event FlightHistoryRecorded(uint256 indexed historyId, uint256 indexed missionId, string eventType);
     event ZoneAuthorized(string zone);
     event CollisionDetected(uint256 indexed missionId1, uint256 indexed missionId2, string zone);
@@ -279,7 +279,7 @@ contract DroneSecure is Ownable, ReentrancyGuard {
         operator.n1Slots -= n1SlotsRequired;
         operator.n2Slots += n2SlotsDesired;
         
-        emit SlotsExchanged(msg.sender, n1SlotsRequired, n2SlotsDesired);
+        emit SlotsExchanged(msg.sender, DroneLevel.N1, n1SlotsRequired, DroneLevel.N2, n2SlotsDesired);
     }
     
     /**
@@ -297,7 +297,7 @@ contract DroneSecure is Ownable, ReentrancyGuard {
         operator.n2Slots -= n2SlotsToExchange;
         operator.n1Slots += n1SlotsReceived;
         
-        emit SlotsExchanged(msg.sender, n1SlotsReceived, n2SlotsToExchange);
+        emit SlotsExchanged(msg.sender, DroneLevel.N2, n2SlotsToExchange, DroneLevel.N1, n1SlotsReceived);
     }
     
     /**
