@@ -375,4 +375,104 @@ describe("DroneSecure", function () {
       expect(await droneSecure.ownerOf(0)).to.equal(addr2.address);
     });
   });
+
+  describe("Previous Owners Tracking", function () {
+    it("Should have empty previousOwners on creation", async function () {
+      await droneSecure.connect(addr1).createMission(ResourceLevel.Standard, IPFS_CID_1);
+      
+      const previousOwners = await droneSecure.getPreviousOwners(0);
+      expect(previousOwners.length).to.equal(0);
+    });
+
+    it("Should track previous owners after transfer", async function () {
+      await droneSecure.connect(addr1).createMission(ResourceLevel.Standard, IPFS_CID_1);
+      await time.increase(600); // Wait for lock period
+      
+      await droneSecure.connect(addr1).transferFrom(addr1.address, addr2.address, 0);
+      
+      const previousOwners = await droneSecure.getPreviousOwners(0);
+      expect(previousOwners.length).to.equal(1);
+      expect(previousOwners[0]).to.equal(addr1.address);
+    });
+
+    it("Should track multiple previous owners", async function () {
+      await droneSecure.connect(addr1).createMission(ResourceLevel.Standard, IPFS_CID_1);
+      await time.increase(600);
+      
+      // Transfer from addr1 to addr2
+      await droneSecure.connect(addr1).transferFrom(addr1.address, addr2.address, 0);
+      await time.increase(600);
+      
+      // Transfer from addr2 to addr3
+      await droneSecure.connect(addr2).transferFrom(addr2.address, addr3.address, 0);
+      
+      const previousOwners = await droneSecure.getPreviousOwners(0);
+      expect(previousOwners.length).to.equal(2);
+      expect(previousOwners[0]).to.equal(addr1.address);
+      expect(previousOwners[1]).to.equal(addr2.address);
+    });
+
+    it("Should not track previous owner if transfer fails", async function () {
+      await droneSecure.connect(addr1).createMission(ResourceLevel.Standard, IPFS_CID_1);
+      
+      // Try to transfer before lock period ends (should fail)
+      await expect(
+        droneSecure.connect(addr1).transferFrom(addr1.address, addr2.address, 0)
+      ).to.be.reverted;
+      
+      const previousOwners = await droneSecure.getPreviousOwners(0);
+      expect(previousOwners.length).to.equal(0);
+    });
+
+    it("Should fail to get previous owners for non-existent token", async function () {
+      await expect(
+        droneSecure.getPreviousOwners(999)
+      ).to.be.revertedWith("Token does not exist");
+    });
+  });
+
+  describe("Last Transfer Timestamp Tracking", function () {
+    it("Should set lastTransferAt to createdAt on creation", async function () {
+      await droneSecure.connect(addr1).createMission(ResourceLevel.Standard, IPFS_CID_1);
+      
+      const mission = await droneSecure.getMission(0);
+      expect(mission.lastTransferAt).to.equal(mission.createdAt);
+      
+      const lastTransferAt = await droneSecure.getLastTransferAt(0);
+      expect(lastTransferAt).to.equal(mission.createdAt);
+    });
+
+    it("Should update lastTransferAt on transfer", async function () {
+      await droneSecure.connect(addr1).createMission(ResourceLevel.Standard, IPFS_CID_1);
+      const mission = await droneSecure.getMission(0);
+      const originalTransferTime = mission.lastTransferAt;
+      
+      await time.increase(600);
+      
+      await droneSecure.connect(addr1).transferFrom(addr1.address, addr2.address, 0);
+      
+      const updatedMission = await droneSecure.getMission(0);
+      expect(updatedMission.lastTransferAt).to.be.gt(originalTransferTime);
+    });
+
+    it("Should track lastTransferAt across multiple transfers", async function () {
+      await droneSecure.connect(addr1).createMission(ResourceLevel.Standard, IPFS_CID_1);
+      
+      await time.increase(600);
+      await droneSecure.connect(addr1).transferFrom(addr1.address, addr2.address, 0);
+      const firstTransferTime = (await droneSecure.getMission(0)).lastTransferAt;
+      
+      await time.increase(600);
+      await droneSecure.connect(addr2).transferFrom(addr2.address, addr3.address, 0);
+      const secondTransferTime = (await droneSecure.getMission(0)).lastTransferAt;
+      
+      expect(secondTransferTime).to.be.gt(firstTransferTime);
+    });
+
+    it("Should fail to get lastTransferAt for non-existent token", async function () {
+      await expect(
+        droneSecure.getLastTransferAt(999)
+      ).to.be.revertedWith("Token does not exist");
+    });
+  });
 });

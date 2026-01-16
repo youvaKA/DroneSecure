@@ -26,8 +26,10 @@ contract DroneSecure is ERC721, ERC721URIStorage, Ownable {
         ResourceLevel level;
         string ipfsCID;           // Hash IPFS des métadonnées
         uint256 createdAt;        // Timestamp de création
+        uint256 lastTransferAt;   // Timestamp du dernier transfert
         uint256 lockedUntil;      // Timestamp jusqu'auquel le transfert est bloqué (10 min)
         address creator;          // Créateur de la mission
+        address[] previousOwners; // Liste des anciens propriétaires
     }
     
     // Mappings pour gérer les contraintes
@@ -79,13 +81,16 @@ contract DroneSecure is ERC721, ERC721URIStorage, Ownable {
         _setTokenURI(tokenId, ipfsCID);
         
         // Création de la mission avec lock de 10 minutes
+        address[] memory emptyOwners = new address[](0);
         missions[tokenId] = Mission({
             tokenId: tokenId,
             level: level,
             ipfsCID: ipfsCID,
             createdAt: block.timestamp,
+            lastTransferAt: block.timestamp,
             lockedUntil: block.timestamp + LOCK_PERIOD,
-            creator: msg.sender
+            creator: msg.sender,
+            previousOwners: emptyOwners
         });
         
         // Mise à jour des compteurs
@@ -125,13 +130,16 @@ contract DroneSecure is ERC721, ERC721URIStorage, Ownable {
         _safeMint(msg.sender, tokenId);
         _setTokenURI(tokenId, ipfsCID);
         
+        address[] memory emptyOwners = new address[](0);
         missions[tokenId] = Mission({
             tokenId: tokenId,
             level: ResourceLevel.MedicalUrgency,
             ipfsCID: ipfsCID,
             createdAt: block.timestamp,
+            lastTransferAt: block.timestamp,
             lockedUntil: block.timestamp + LOCK_PERIOD,
-            creator: msg.sender
+            creator: msg.sender,
+            previousOwners: emptyOwners
         });
         
         userMissionCount[msg.sender]++;
@@ -170,6 +178,12 @@ contract DroneSecure is ERC721, ERC721URIStorage, Ownable {
                 
                 // Vérification que le destinataire ne dépasse pas la limite
                 require(userMissionCount[to] <= MAX_MISSIONS_PER_USER, "Recipient mission limit reached");
+                
+                // Ajout du propriétaire actuel à la liste des anciens propriétaires
+                missions[tokenId].previousOwners.push(from);
+                
+                // Mise à jour du timestamp du dernier transfert
+                missions[tokenId].lastTransferAt = block.timestamp;
             }
         }
         
@@ -213,6 +227,22 @@ contract DroneSecure is ERC721, ERC721URIStorage, Ownable {
             return 0;
         }
         return nextAllowedTime - block.timestamp;
+    }
+    
+    /**
+     * @dev Retourne la liste des anciens propriétaires d'une mission
+     */
+    function getPreviousOwners(uint256 tokenId) public view returns (address[] memory) {
+        require(_ownerOf(tokenId) != address(0), "Token does not exist");
+        return missions[tokenId].previousOwners;
+    }
+    
+    /**
+     * @dev Retourne le timestamp du dernier transfert d'une mission
+     */
+    function getLastTransferAt(uint256 tokenId) public view returns (uint256) {
+        require(_ownerOf(tokenId) != address(0), "Token does not exist");
+        return missions[tokenId].lastTransferAt;
     }
     
     // Override requis par Solidity
