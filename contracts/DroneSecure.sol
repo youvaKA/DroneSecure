@@ -121,7 +121,6 @@ contract DroneSecure is ERC721, ERC721URIStorage, Ownable {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             _burn(tokenIds[i]);
             delete missions[tokenIds[i]];
-            userMissionCount[msg.sender]--;
         }
         
         // Création d'un nouveau token de niveau Medical Urgency

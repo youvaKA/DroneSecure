@@ -61,6 +61,7 @@ Un exemple complet est disponible dans `examples/mission-metadata.json`.
 
 - Node.js >= 16.x
 - npm ou yarn
+- MetaMask (pour le frontend)
 
 ### Installation
 
@@ -94,6 +95,24 @@ npm run node
 # Dans un autre terminal, déployer le contrat
 npm run deploy:local
 ```
+
+### Lancer le Frontend
+
+```bash
+# Installer les dépendances du frontend
+cd frontend
+npm install
+
+# Configurer l'adresse du contrat dans src/App.jsx
+# CONTRACT_ADDRESS = 'ADRESSE_DU_CONTRAT_DEPLOYE'
+
+# Démarrer le serveur de développement
+npm run dev
+```
+
+Le frontend sera disponible sur http://localhost:3000
+
+Pour plus de détails sur le frontend, consultez [frontend/README.md](frontend/README.md)
 
 ---
 
@@ -214,7 +233,9 @@ Le contrat implémente plusieurs mécanismes de sécurité :
 - [x] Mécanisme d'échange de ressources
 - [x] Intégration IPFS
 - [x] Suite de tests complète
-- [ ] Interface frontend React
+- [x] Interface frontend React avec Vite
+- [x] Intégration ethers.js pour Web3
+- [x] Correction du bug d'overflow dans swapResources
 - [ ] Intégration Pinata pour upload IPFS
 - [ ] Déploiement sur testnet (Sepolia)
 - [ ] Tableau de bord de monitoring
