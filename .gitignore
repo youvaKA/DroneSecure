@@ -9,6 +9,10 @@ typechain-types
 cache
 artifacts
 
+# Solc output files
+*.abi
+*.bin
+
 # macOS
 .DS_Store
 
