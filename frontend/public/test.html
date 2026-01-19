@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Ethers.js v6</title>
+</head>
+<body>
+    <h1>Test DroneSecure</h1>
+    <button onclick="testConnection()">Test Connexion</button>
+    <div id="output"></div>
+
+    <script src="https://cdn.ethers.io/lib/ethers-6.7.0.umd.min.js"></script>
+    <script>
+        function log(msg) {
+            console.log(msg);
+            document.getElementById('output').innerHTML += '<p>' + msg + '</p>';
+        }
+
+        async function testConnection() {
+            log('=== Test de Connexion ===');
+            
+            // Test 1: Ethers chargé?
+            if (typeof ethers === 'undefined') {
+                log('❌ Ethers.js n\'est pas chargé!');
+                return;
+            }
+            log('✅ Ethers.js version: ' + ethers.version);
+            
+            // Test 2: MetaMask installé?
+            if (typeof window.ethereum === 'undefined') {
+                log('❌ MetaMask n\'est pas installé!');
+                return;
+            }
+            log('✅ MetaMask détecté');
+            
+            // Test 3: Connexion
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                log('✅ Connecté au compte: ' + accounts[0]);
+                
+                // Test 4: Provider
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                log('✅ Provider créé');
+                
+                const network = await provider.getNetwork();
+                log('✅ Réseau: ' + network.name + ' (chainId: ' + network.chainId + ')');
+                
+                const signer = await provider.getSigner();
+                const address = await signer.getAddress();
+                log('✅ Signer: ' + address);
+                
+            } catch (error) {
+                log('❌ Erreur: ' + error.message);
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
