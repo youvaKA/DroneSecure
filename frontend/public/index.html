@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DroneSecure - Gestion Décentralisée de l'Espace Aérien</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🛸 DroneSecure</h1>
+                    <p class="tagline">Système de Gestion Décentralisée de l'Espace Aérien</p>
+                </div>
+                <div class="wallet-section">
+                    <button id="connectWallet" class="btn btn-primary">Connecter Wallet</button>
+                    <div id="walletInfo" class="wallet-info hidden">
+                        <span id="walletAddress"></span>
+                        <span id="userMissionCount" class="badge">0 missions</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Alert Messages -->
+        <div id="alertContainer" class="alert-container"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Connection Required Message -->
+            <div id="connectMessage" class="connect-message">
+                <h2>🔐 Connexion Requise</h2>
+                <p>Connectez votre wallet MetaMask pour accéder à DroneSecure</p>
+                <button class="btn btn-primary btn-large" onclick="connectWallet()">Connecter MetaMask</button>
+            </div>
+
+            <!-- App Content (Hidden until connected) -->
+            <div id="appContent" class="app-content hidden">
+                <!-- Navigation Tabs -->
+                <nav class="tabs">
+                    <button class="tab-button active" data-tab="dashboard">📊 Tableau de Bord</button>
+                    <button class="tab-button" data-tab="create">➕ Créer Mission</button>
+                    <button class="tab-button" data-tab="missions">🗂️ Mes Missions</button>
+                    <button class="tab-button" data-tab="swap">🔄 Échanger Ressources</button>
+                    <button class="tab-button" data-tab="transfer">📤 Transférer</button>
+                </nav>
+
+                <!-- Tab Contents -->
+                <div class="tab-content">
+                    <!-- Dashboard Tab -->
+                    <div id="dashboard" class="tab-pane active">
+                        <h2>Tableau de Bord</h2>
+                        
+                        <div class="dashboard-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">📋</div>
+                                <div class="stat-info">
+                                    <div class="stat-value" id="dashMissionCount">0</div>
+                                    <div class="stat-label">Missions Actives</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">⏱️</div>
+                                <div class="stat-info">
+                                    <div class="stat-value" id="dashCooldown">Prêt</div>
+                                    <div class="stat-label">Cooldown</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">🎯</div>
+                                <div class="stat-info">
+                                    <div class="stat-value" id="dashCanCreate">Oui</div>
+                                    <div class="stat-label">Peut Créer</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon">🏥</div>
+                                <div class="stat-info">
+                                    <div class="stat-value" id="dashUrgentCount">0</div>
+                                    <div class="stat-label">Urgences Médicales</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-section">
+                            <h3>🔗 Informations du Contrat</h3>
+                            <div class="contract-info">
+                                <div class="info-row">
+                                    <span class="info-label">Adresse du Contrat:</span>
+                                    <span class="info-value" id="contractAddress">-</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Réseau:</span>
+                                    <span class="info-value" id="networkName">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rules-section">
+                            <h3>📜 Règles de Gestion</h3>
+                            <ul class="rules-list">
+                                <li>✅ Maximum 4 missions actives par utilisateur</li>
+                                <li>⏱️ Cooldown de 5 minutes entre deux créations</li>
+                                <li>🔒 Lock de 10 minutes après création (transfert bloqué)</li>
+                                <li>🔄 Échange possible: 3 Standard → 1 Urgence Médicale</li>
+                                <li>📦 3 niveaux de ressources: Standard, Express, Urgence Médicale</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Create Mission Tab -->
+                    <div id="create" class="tab-pane">
+                        <h2>➕ Créer une Nouvelle Mission</h2>
+                        
+                        <form id="createMissionForm" class="form">
+                            <div class="form-group">
+                                <label for="missionLevel">Niveau de Ressource *</label>
+                                <select id="missionLevel" class="form-control" required>
+                                    <option value="">-- Sélectionner un niveau --</option>
+                                    <option value="1">Standard (Niveau 1)</option>
+                                    <option value="2">Express (Niveau 2)</option>
+                                    <option value="3">Urgence Médicale (Niveau 3)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="missionName">Nom de la Mission *</label>
+                                <input type="text" id="missionName" class="form-control" placeholder="Ex: Mission_Alpha_2026" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ipfsCID">IPFS CID *</label>
+                                <input type="text" id="ipfsCID" class="form-control" placeholder="Ex: QmP7hdxcUCjC5aM6ZgcRvSgMPP9HjL1F9Zr2xVZ1MqQ8Lh" required>
+                                <small class="form-text">Hash IPFS contenant les métadonnées de la mission</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Métadonnées IPFS (Optionnel - pour référence)</label>
+                                <div class="metadata-fields">
+                                    <input type="text" id="metaWeight" class="form-control form-control-sm" placeholder="Poids (ex: 2kg)">
+                                    <input type="text" id="metaRange" class="form-control form-control-sm" placeholder="Portée (ex: 15km)">
+                                    <input type="text" id="metaDeparture" class="form-control form-control-sm" placeholder="Départ">
+                                    <input type="text" id="metaDestination" class="form-control form-control-sm" placeholder="Destination">
+                                </div>
+                                <small class="form-text">Ces informations sont pour référence. Les vraies métadonnées doivent être uploadées sur IPFS.</small>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-large">Créer Mission</button>
+                        </form>
+
+                        <div class="ipfs-help">
+                            <h4>💡 Comment obtenir un CID IPFS?</h4>
+                            <ol>
+                                <li>Créez un fichier JSON avec vos métadonnées (voir <code>examples/mission-metadata.json</code>)</li>
+                                <li>Uploadez le fichier sur <a href="https://www.pinata.cloud/" target="_blank">Pinata</a> ou un autre service IPFS</li>
+                                <li>Copiez le CID généré et collez-le ci-dessus</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- My Missions Tab -->
+                    <div id="missions" class="tab-pane">
+                        <h2>🗂️ Mes Missions</h2>
+                        
+                        <div class="missions-controls">
+                            <button id="refreshMissions" class="btn btn-secondary">🔄 Actualiser</button>
+                            <div class="filter-group">
+                                <label>Filtrer par niveau:</label>
+                                <select id="filterLevel" class="form-control form-control-sm">
+                                    <option value="">Tous</option>
+                                    <option value="1">Standard</option>
+                                    <option value="2">Express</option>
+                                    <option value="3">Urgence Médicale</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="missionsList" class="missions-list">
+                            <div class="loading">Chargement des missions...</div>
+                        </div>
+                    </div>
+
+                    <!-- Swap Resources Tab -->
+                    <div id="swap" class="tab-pane">
+                        <h2>🔄 Échanger des Ressources</h2>
+                        
+                        <div class="swap-info">
+                            <p class="info-message">
+                                <strong>Règle d'échange:</strong> Vous pouvez échanger 3 tokens de niveau Standard contre 1 token de niveau Urgence Médicale.
+                            </p>
+                        </div>
+
+                        <form id="swapForm" class="form">
+                            <div class="form-group">
+                                <label>Sélectionner 3 Missions Standard *</label>
+                                <div id="standardMissionsList" class="swap-missions-list">
+                                    <div class="loading">Chargement des missions Standard...</div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="swapIpfsCID">IPFS CID pour la nouvelle mission *</label>
+                                <input type="text" id="swapIpfsCID" class="form-control" placeholder="QmP7hdxcUCjC5aM6ZgcRvSgMPP9HjL1F9Zr2xVZ1MqQ8Lh" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-large">Échanger 3 → 1</button>
+                        </form>
+                    </div>
+
+                    <!-- Transfer Tab -->
+                    <div id="transfer" class="tab-pane">
+                        <h2>📤 Transférer une Mission</h2>
+                        
+                        <form id="transferForm" class="form">
+                            <div class="form-group">
+                                <label for="transferTokenId">Mission à Transférer *</label>
+                                <select id="transferTokenId" class="form-control" required>
+                                    <option value="">-- Sélectionner une mission --</option>
+                                </select>
+                            </div>
+
+                            <div id="transferMissionInfo" class="mission-info-card hidden"></div>
+
+                            <div class="form-group">
+                                <label for="transferToAddress">Adresse du Destinataire *</label>
+                                <input type="text" id="transferToAddress" class="form-control" placeholder="0x..." required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-large">Transférer Mission</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>DroneSecure © 2026 - Système de Gestion Décentralisée de l'Espace Aérien</p>
+            <p class="footer-links">
+                <a href="https://github.com/youvaKA/DroneSecure" target="_blank">GitHub</a> |
+                <a href="#" onclick="showDocumentation()">Documentation</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <script src="../src/app.js"></script>
+</body>
+</html>
