@@ -360,6 +360,111 @@ body {
     border-left: 4px solid var(--primary-color);
 }
 
+/* IPFS Upload Section */
+.ipfs-upload-section {
+    background: var(--bg-color);
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    border: 2px dashed var(--border-color);
+}
+
+.ipfs-upload-section h3 {
+    color: var(--dark-color);
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+}
+
+.credentials-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--warning-color);
+}
+
+.credentials-section h4 {
+    color: var(--dark-color);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.metadata-form {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 0;
+}
+
+.form-group.half-width {
+    margin-bottom: 15px;
+}
+
+.upload-status {
+    display: inline-block;
+    margin-left: 15px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    animation: fadeIn 0.3s ease;
+}
+
+.upload-status.success {
+    background: var(--success-color);
+    color: white;
+}
+
+.upload-status.error {
+    background: var(--danger-color);
+    color: white;
+}
+
+.upload-status.loading {
+    background: var(--primary-color);
+    color: white;
+}
+
+.separator {
+    text-align: center;
+    margin: 30px 0;
+    position: relative;
+}
+
+.separator::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.separator span {
+    background: white;
+    padding: 0 20px;
+    position: relative;
+    color: #7f8c8d;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.manual-cid-section {
+    margin-bottom: 20px;
+}
+
+.manual-cid-section h3 {
+    color: var(--dark-color);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
 /* Forms */
 .form {
     max-width: 600px;

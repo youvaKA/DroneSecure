@@ -26,6 +26,7 @@ let signer;
 let contract;
 let userAddress;
 let userMissions = [];
+let ipfsUploader;
 
 // Contract address - Will be set after deployment
 // For local testing, deploy the contract and update this address
@@ -40,6 +41,11 @@ const LEVEL_NAMES = {
 
 // Initialize the application
 async function init() {
+    // Initialize IPFS uploader
+    if (typeof IPFSUploader !== 'undefined') {
+        ipfsUploader = new IPFSUploader();
+    }
+    
     // Setup tab navigation
     setupTabs();
     
@@ -478,6 +484,93 @@ async function loadStandardMissions() {
     `).join('');
 }
 
+// Upload metadata to IPFS
+async function uploadMetadataToIPFS() {
+    try {
+        // Get Pinata credentials
+        const apiKey = document.getElementById('pinataApiKey').value.trim();
+        const secretKey = document.getElementById('pinataSecretKey').value.trim();
+        
+        if (!apiKey || !secretKey) {
+            showAlert('Veuillez entrer vos clés API Pinata', 'warning');
+            return;
+        }
+        
+        // Set credentials
+        ipfsUploader.setCredentials(apiKey, secretKey);
+        
+        // Get metadata values
+        const name = document.getElementById('metaMissionName').value.trim();
+        if (!name) {
+            showAlert('Le nom de la mission est requis', 'warning');
+            return;
+        }
+        
+        const missionType = document.getElementById('metaMissionType').value.trim();
+        const level = document.getElementById('missionLevel').value;
+        
+        // Determine mission value based on level selected
+        let missionValue = 'Niveau 1';
+        if (level === '2') missionValue = 'Niveau 2';
+        if (level === '3') missionValue = 'Niveau 3';
+        
+        // Show loading status
+        const statusEl = document.getElementById('uploadStatus');
+        statusEl.textContent = '⏳ Upload en cours...';
+        statusEl.className = 'upload-status loading';
+        
+        // Check if there's a flight plan file to upload first
+        const flightPlanFile = document.getElementById('metaFlightPlanFile').files[0];
+        let flightPlanHash = '';
+        
+        if (flightPlanFile) {
+            showAlert('Upload du plan de vol vers IPFS...', 'info');
+            flightPlanHash = await ipfsUploader.uploadFile(flightPlanFile);
+            showAlert('Plan de vol uploadé: ' + flightPlanHash, 'success');
+        }
+        
+        // Create metadata object
+        const metadata = ipfsUploader.createMissionMetadata({
+            name: name,
+            type: missionType || LEVEL_NAMES[level] || 'Standard',
+            value: missionValue,
+            flightPlanHash: flightPlanHash,
+            weight: document.getElementById('metaWeight').value.trim(),
+            range: document.getElementById('metaRange').value.trim(),
+            departureCity: document.getElementById('metaDeparture').value.trim(),
+            destinationCity: document.getElementById('metaDestination').value.trim(),
+            estimatedDuration: document.getElementById('metaDuration').value.trim(),
+            cargo: document.getElementById('metaCargo').value.trim(),
+            priority: level === '3' ? 'high' : level === '2' ? 'medium' : 'normal'
+        });
+        
+        // Upload metadata to IPFS
+        showAlert('Upload des métadonnées vers IPFS...', 'info');
+        const cid = await ipfsUploader.uploadJSON(metadata);
+        
+        // Update UI with success
+        statusEl.textContent = '✅ Uploadé: ' + cid;
+        statusEl.className = 'upload-status success';
+        
+        // Auto-fill the CID field
+        document.getElementById('ipfsCID').value = cid;
+        
+        showAlert('Métadonnées uploadées avec succès! CID: ' + cid, 'success');
+        
+        // Scroll to mission creation form
+        document.getElementById('createMissionForm').scrollIntoView({ behavior: 'smooth' });
+        
+        return cid;
+        
+    } catch (error) {
+        console.error('Error uploading to IPFS:', error);
+        const statusEl = document.getElementById('uploadStatus');
+        statusEl.textContent = '❌ Erreur: ' + error.message;
+        statusEl.className = 'upload-status error';
+        showAlert('Erreur lors de l\'upload: ' + error.message, 'error');
+    }
+}
+
 // Toggle swap mission selection
 function toggleSwapMission(tokenId) {
     const checkbox = document.getElementById(`swap_${tokenId}`);
@@ -549,6 +642,11 @@ function setupTabs() {
 
 // Setup forms
 function setupForms() {
+    // Upload metadata button
+    document.getElementById('uploadMetadataBtn').addEventListener('click', async () => {
+        await uploadMetadataToIPFS();
+    });
+    
     // Create mission form
     document.getElementById('createMissionForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -667,9 +765,10 @@ function showDocumentation() {
 // Initialize on page load
 window.addEventListener('DOMContentLoaded', init);
 
-// Expose connectWallet globally for onclick handler
+// Expose functions globally for onclick handlers
 window.connectWallet = connectWallet;
 window.viewMissionDetails = viewMissionDetails;
 window.openIPFS = openIPFS;
 window.toggleSwapMission = toggleSwapMission;
 window.showDocumentation = showDocumentation;
+window.uploadMetadataToIPFS = uploadMetadataToIPFS;

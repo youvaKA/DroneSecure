@@ -118,6 +118,94 @@
                     <div id="create" class="tab-pane">
                         <h2>➕ Créer une Nouvelle Mission</h2>
                         
+                        <!-- IPFS Upload Section -->
+                        <div class="ipfs-upload-section">
+                            <h3>📤 Option 1: Créer et Uploader les Métadonnées vers IPFS</h3>
+                            
+                            <div class="credentials-section">
+                                <h4>🔑 Configuration Pinata (Optionnel)</h4>
+                                <div class="form-group">
+                                    <label for="pinataApiKey">API Key Pinata</label>
+                                    <input type="password" id="pinataApiKey" class="form-control" placeholder="Votre clé API Pinata">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pinataSecretKey">Secret Key Pinata</label>
+                                    <input type="password" id="pinataSecretKey" class="form-control" placeholder="Votre clé secrète Pinata">
+                                </div>
+                                <small class="form-text">
+                                    Obtenez vos clés sur <a href="https://www.pinata.cloud/" target="_blank">Pinata.cloud</a>. 
+                                    Laissez vide pour utiliser un CID existant.
+                                </small>
+                            </div>
+
+                            <form id="metadataForm" class="form metadata-form">
+                                <div class="form-row">
+                                    <div class="form-group half-width">
+                                        <label for="metaMissionName">Nom de la Mission *</label>
+                                        <input type="text" id="metaMissionName" class="form-control" placeholder="Mission_Alpha_2026">
+                                    </div>
+                                    <div class="form-group half-width">
+                                        <label for="metaMissionType">Type de Mission</label>
+                                        <input type="text" id="metaMissionType" class="form-control" placeholder="Urgence Médicale">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group half-width">
+                                        <label for="metaWeight">Poids</label>
+                                        <input type="text" id="metaWeight" class="form-control" placeholder="2kg">
+                                    </div>
+                                    <div class="form-group half-width">
+                                        <label for="metaRange">Portée</label>
+                                        <input type="text" id="metaRange" class="form-control" placeholder="15km">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group half-width">
+                                        <label for="metaDeparture">Ville de Départ</label>
+                                        <input type="text" id="metaDeparture" class="form-control" placeholder="Paris">
+                                    </div>
+                                    <div class="form-group half-width">
+                                        <label for="metaDestination">Ville de Destination</label>
+                                        <input type="text" id="metaDestination" class="form-control" placeholder="Lyon">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group half-width">
+                                        <label for="metaDuration">Durée Estimée</label>
+                                        <input type="text" id="metaDuration" class="form-control" placeholder="45min">
+                                    </div>
+                                    <div class="form-group half-width">
+                                        <label for="metaCargo">Cargaison</label>
+                                        <input type="text" id="metaCargo" class="form-control" placeholder="Medical supplies">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="metaFlightPlanFile">Plan de Vol (Fichier PDF/JSON)</label>
+                                    <input type="file" id="metaFlightPlanFile" class="form-control" accept=".pdf,.json">
+                                    <small class="form-text">Uploadez un fichier contenant le plan de vol détaillé</small>
+                                </div>
+
+                                <button type="button" id="uploadMetadataBtn" class="btn btn-secondary">
+                                    📤 Uploader vers IPFS
+                                </button>
+                                <span id="uploadStatus" class="upload-status"></span>
+                            </form>
+                        </div>
+
+                        <div class="separator">
+                            <span>OU</span>
+                        </div>
+
+                        <!-- Manual CID Entry -->
+                        <div class="manual-cid-section">
+                            <h3>🔗 Option 2: Utiliser un CID IPFS Existant</h3>
+                        </div>
+
+                        <!-- Mission Creation Form -->
                         <form id="createMissionForm" class="form">
                             <div class="form-group">
                                 <label for="missionLevel">Niveau de Ressource *</label>
@@ -130,38 +218,13 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="missionName">Nom de la Mission *</label>
-                                <input type="text" id="missionName" class="form-control" placeholder="Ex: Mission_Alpha_2026" required>
-                            </div>
-
-                            <div class="form-group">
                                 <label for="ipfsCID">IPFS CID *</label>
                                 <input type="text" id="ipfsCID" class="form-control" placeholder="Ex: QmP7hdxcUCjC5aM6ZgcRvSgMPP9HjL1F9Zr2xVZ1MqQ8Lh" required>
                                 <small class="form-text">Hash IPFS contenant les métadonnées de la mission</small>
                             </div>
 
-                            <div class="form-group">
-                                <label>Métadonnées IPFS (Optionnel - pour référence)</label>
-                                <div class="metadata-fields">
-                                    <input type="text" id="metaWeight" class="form-control form-control-sm" placeholder="Poids (ex: 2kg)">
-                                    <input type="text" id="metaRange" class="form-control form-control-sm" placeholder="Portée (ex: 15km)">
-                                    <input type="text" id="metaDeparture" class="form-control form-control-sm" placeholder="Départ">
-                                    <input type="text" id="metaDestination" class="form-control form-control-sm" placeholder="Destination">
-                                </div>
-                                <small class="form-text">Ces informations sont pour référence. Les vraies métadonnées doivent être uploadées sur IPFS.</small>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary btn-large">Créer Mission</button>
+                            <button type="submit" class="btn btn-primary btn-large">🚀 Créer Mission sur la Blockchain</button>
                         </form>
-
-                        <div class="ipfs-help">
-                            <h4>💡 Comment obtenir un CID IPFS?</h4>
-                            <ol>
-                                <li>Créez un fichier JSON avec vos métadonnées (voir <code>examples/mission-metadata.json</code>)</li>
-                                <li>Uploadez le fichier sur <a href="https://www.pinata.cloud/" target="_blank">Pinata</a> ou un autre service IPFS</li>
-                                <li>Copiez le CID généré et collez-le ci-dessus</li>
-                            </ol>
-                        </div>
                     </div>
 
                     <!-- My Missions Tab -->
@@ -251,6 +314,7 @@
 
     <!-- Scripts -->
     <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <script src="../src/ipfs.js"></script>
     <script src="../src/app.js"></script>
 </body>
 </html>
