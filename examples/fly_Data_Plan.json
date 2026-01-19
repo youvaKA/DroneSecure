@@ -1,0 +1,27 @@
+{
+    "name": "Mission_Alpha_2026",
+    "type": "Urgence Médicale",
+    "value": "Niveau 3",
+    "description": "Transport de médicaments d'urgence",
+    "departurePoint": {
+        "latitude": 48.8566,
+        "longitude": 2.3522,
+        "altitude": 50
+    },
+    "arrivalPoint": {
+        "latitude": 48.8606,
+        "longitude": 2.3376,
+        "altitude": 50
+    },
+    "flightPlanHash": "QmXy9...",
+    "droneModel": "MedDrone X-500",
+    "weight": "2kg",
+    "range": "15km",
+    "createdAt": "1737052800",
+    "previousOwners": ["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"],
+    "attributes": {
+        "priority": "HIGH",
+        "medicationType": "Antibiotics",
+        "patientId": "PATIENT-12345"
+    }
+}

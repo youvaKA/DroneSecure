@@ -332,14 +332,22 @@ function openIPFS(cid) {
 // Create mission
 async function createMission(level, ipfsCID) {
     try {
+        console.log('Creating mission:', { level, ipfsCID, from: userAddress });
+        
         if (!contract) {
             showAlert('Contrat non initialisé', 'error');
+            return;
+        }
+        
+        if (!ipfsCID || ipfsCID === '') {
+            showAlert('IPFS CID manquant', 'error');
             return;
         }
         
         showAlert('Création de la mission en cours...', 'info');
         
         const tx = await contract.createMission(level, ipfsCID);
+        console.log('Transaction hash:', tx.hash);
         showAlert('Transaction envoyée. En attente de confirmation...', 'info');
         
         await tx.wait();
@@ -417,12 +425,20 @@ async function swapResources(tokenIds, ipfsCID) {
 // Transfer mission
 async function transferMission(tokenId, toAddress) {
     try {
+        console.log('Transfer attempt:', { tokenId, toAddress, from: userAddress });
+        
         if (!contract) {
             showAlert('Contrat non initialisé', 'error');
             return;
         }
         
-        if (!ethers.utils.isAddress(toAddress)) {
+        // Validation avec Ethers v6
+        if (!toAddress || toAddress === '') {
+            showAlert('Adresse de destination manquante', 'error');
+            return;
+        }
+        
+        if (!ethers.isAddress(toAddress)) {
             showAlert('Adresse invalide', 'error');
             return;
         }
