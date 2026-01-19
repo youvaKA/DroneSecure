@@ -214,25 +214,61 @@ Le contrat implémente plusieurs mécanismes de sécurité :
 - [x] Mécanisme d'échange de ressources
 - [x] Intégration IPFS
 - [x] Suite de tests complète
-- [ ] Interface frontend React
-- [ ] Intégration Pinata pour upload IPFS
+- [x] Interface web complète (HTML/CSS/JavaScript)
+- [x] Intégration Pinata pour upload IPFS
 - [ ] Déploiement sur testnet (Sepolia)
-- [ ] Tableau de bord de monitoring
+- [ ] Tableau de bord de monitoring avancé
 
 ---
 
-## 📄 11. Licence
+## 🌐 11. Interface Web
+
+DroneSecure dispose maintenant d'une interface web complète et intuitive !
+
+### Fonctionnalités de l'Interface
+
+- ✅ **Connexion Wallet MetaMask**
+- ✅ **Tableau de bord** avec statistiques en temps réel
+- ✅ **Création de missions** avec upload IPFS intégré
+- ✅ **Visualisation des missions** avec filtres
+- ✅ **Échange de ressources** (3 Standard → 1 Urgence)
+- ✅ **Transfert de missions** avec vérification de statut
+- ✅ **Upload automatique vers IPFS** via Pinata
+- ✅ **Design responsive** (mobile, tablette, desktop)
+
+### Lancer l'Interface
+
+```bash
+# Démarrer le serveur frontend
+npm run frontend
+
+# Ou directement
+npm start
+```
+
+Puis ouvrez http://localhost:8000 dans votre navigateur.
+
+### Documentation de l'Interface
+
+Consultez les guides détaillés:
+- **Installation et utilisation:** [GUIDE_INTERFACE_WEB.md](GUIDE_INTERFACE_WEB.md)
+- **Intégration IPFS:** [GUIDE_IPFS_PINATA.md](GUIDE_IPFS_PINATA.md)
+- **Documentation frontend:** [frontend/README.md](frontend/README.md)
+
+---
+
+## 📄 12. Licence
 
 Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
 ---
 
-## 👥 12. Contribution
+## 👥 13. Contribution
 
 Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.
 
 ---
 
-## 📧 13. Contact
+## 📧 14. Contact
 
 Pour toute question ou suggestion, veuillez ouvrir une issue sur GitHub.
